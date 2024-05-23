@@ -68,11 +68,16 @@ display = pg.display.set_mode((winx, winy))
 game = True
 end = False
 
+discovered = 0
+
 while game:
     #Clock
     pg.time.Clock().tick(FPS)
 
     display.fill("white")
+
+    if discovered - len(mines) >= 81:
+        game = False
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -84,13 +89,54 @@ while game:
 
             for i in mines:
                 for j in i:
+
+                    if j.isBomb:
+                        j.color = "red"
+
                     if mousePos[0] >= j.x and mousePos[0] <= j.x + 50 and mousePos[1] >= j.y and mousePos[1] <= j.y + 50 and j.clickable:
                         j.clickable = False
 
-                        if i[i.index(j) + 1].isBomb:
-                            numMines += 1
-                        if i[i.index(j) - 1].isBomb:
-                            numMines += 1
+                        if j.isBomb:
+                            j.color = "red"
+                            pg.display.update()
+                            time.sleep(0.2)
+                            game = False
+
+                        #LEVO IN DESNO
+                        if i.index(j) + 1 < len(i):
+                            if i[i.index(j) + 1].isBomb:
+                                numMines += 1
+                        if i.index(j) - 1 < len(i):
+                            if i[i.index(j) - 1].isBomb:
+                                numMines += 1
+
+                        #GOR IN DOL
+                        if mines.index(i) + 1 <= len(mines) - 1:
+                            if mines[mines.index(i) + 1][i.index(j)].isBomb:
+                                numMines += 1
+
+                        if mines.index(i) - 1 >= 0:
+                            if mines[mines.index(i) - 1][i.index(j)].isBomb:
+                                numMines += 1
+
+                            #GOR LEVO
+                        if mines.index(i) - 1 <= len(mines) - 1 and i.index(j) - 1 < len(i):
+                            if mines[mines.index(i) - 1][i.index(j) - 1].isBomb:
+                                numMines += 1
+                            #GOR DESNO
+                        if mines.index(i) - 1 <= len(mines) - 1 and i.index(j) + 1 < len(i):
+                            if mines[mines.index(i) - 1][i.index(j) + 1].isBomb:
+                                numMines += 1
+                            #DOL LEVO
+                        if mines.index(i) + 1 <= len(mines) - 1 and i.index(j) - 1 < len(i):
+                            if mines[mines.index(i) + 1][i.index(j) - 1].isBomb:
+                                numMines += 1
+                            #DOL DESNO
+                        if mines.index(i) + 1 <= len(mines) - 1 and i.index(j) + 1 < len(i):
+                            if mines[mines.index(i) + 1][i.index(j) + 1].isBomb:
+                                numMines += 1
+
+                        discovered += 1
 
                         texts.append(Text(j.x + 15, j.y + 10, numMines))
 
